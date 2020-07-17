@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-deployment
+  labels:
+    env: metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+       env: metrics
+  template:
+    metadata:
+       name: prometheus
+       labels:
+        env: metrics
+    spec:
+       containers:
+       - image: sanjay874/prometheus:v1 
+         name: prometheus-image
+         ports:
+         - containerPort: 9090
+           name: prometheus-port
+         volumeMounts:
+         - name: prometheus-persistent-storage
+           mountPath: /prometheus-2.18.1.linux-amd64/data
+         - name: config-file-volume
+           mountPath: /etc/prom/prometheus.yml
+           subPath: prometheus.yml
+       volumes:
+       - name: prometheus-persistent-storage
+         persistentVolumeClaim:
+            claimName: prometheus-pvc
+       - name: config-file-volume
+         configMap:
+            name: prometheus-configmap
